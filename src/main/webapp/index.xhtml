@@ -1,0 +1,184 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+
+	<h:head>
+		<title>PUNTO NET - EDWIN LANDETA</title>
+		<h:outputStylesheet library="css" name="primeflex.min.css" />
+	</h:head>
+
+	<h:body>
+		<p:growl id="growl" showDetail="true" />
+
+		<div class="p-grid" style="margin-top: 20px">
+			<div class="p-col-12">
+				<p:card>
+					<div class="p-grid">
+						<div class="p-col-4">
+
+							<p:selectOneMenu id="option"
+								value="#{ticketController.estadoFilter}"
+								valueChangeListener="#{ticketController.updateTable}">
+
+								<f:selectItem itemLabel="Select" itemValue="0" />
+								<f:selectItem itemLabel="Open" itemValue="1" />
+								<f:selectItem itemLabel="Closed" itemValue="2" />
+								<f:selectItem itemLabel="Overdue" itemValue="3" />
+								<f:selectItem itemLabel="Escalated" itemValue="4" />
+								<f:selectItem itemLabel="High Priority" itemValue="5" />
+								
+
+							</p:selectOneMenu>
+						</div>
+
+						<div class="p-col-8 p-text-right">
+							<p:button value="+ New Ticket" id="btnNew"
+								onclick="PF('dlg').show() #{ticketController.onTicketCreate()}" />
+						</div>
+
+					</div>
+				</p:card>
+			</div>
+			<div class="p-col-12">
+
+				<p:dataTable id="table" var="ticket" size="small"
+					value="#{ticketController.tickets}">
+
+					<p:column headerText="Description">
+						<div class="p-grid">
+							<div class="p-col-12">
+								<strong> # <h:outputText value="#{ticket.idTicket}" /></strong>
+							</div>
+							<div class="p-col-12">
+								<i class="pi pi-wallet"> </i>
+								<h:outputText value=" #{ticket.descripcionTicket}" />
+							</div>
+						</div>
+					</p:column>
+					<p:column headerText="Status">
+						<h:outputText value="#{ticket.estado.descripcionEstado}" />
+					</p:column>
+					<p:column headerText="Priority">
+						<h:outputText value="#{ticket.prioridad.descripcionPrioridad}" />
+
+					</p:column>
+					<p:column headerText="Case Owner">
+						<i class="pi pi-user"> </i>
+						<h:outputText
+							value=" #{ticket.operador.nombreOperador } #{ticket.operador.apellidoOperador}" />
+					</p:column>
+					<p:column headerText="Due Date">
+						<h:outputText value="#{ticket.fechaCreacion}" />
+					</p:column>
+					<p:column headerText="Action">
+						<p:commandButton icon="pi pi-pencil"
+							styleClass="rounded-button ui-button-info"
+							actionListener="#{ticketController.edit(ticket.idTicket)}"
+							update="formEdit" />
+						<p:commandButton icon="pi pi-trash"
+							styleClass="rounded-button ui-button-danger"
+							action="#{ticketController.delete(ticket.idTicket)}"
+							update="table" />
+						<p:commandButton icon="pi pi-refresh"
+							styleClass="rounded-button ui-button-success"
+							action="#{ticketController.changeStatus(ticket.idTicket)}"
+							update="formEditStatus" />
+					</p:column>
+				</p:dataTable>
+			</div>
+
+		</div>
+
+		<p:dialog header="NEW TICKET" widgetVar="dlg" minHeight="40"
+			width="500" showEffect="fade">
+			<h:form id="form">
+				<div class="p-grid">
+					<div class="p-col-6">
+						<p:selectOneMenu id="elemento" filter="true" required="false"
+							value="#{ticketController.elemetoTicket}" style="width:100%">
+							<f:selectItem itemLabel="Select Element" itemValue="0" />
+							<f:selectItems value="#{ticketController.elementoList}"
+								var="elemento" itemLabel="#{elemento.descripcionElemento}"
+								itemValue="#{elemento.idElemento}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="p-col-6">
+						<p:selectOneMenu style="width:100%" id="prioridad"
+							value="#{ticketController.prioridadTicket}">
+							<f:selectItem itemLabel="Priority" itemValue="0" />
+							<f:selectItems value="#{ticketController.prioridadList}"
+								var="prioridad" itemLabel="#{prioridad.descripcionPrioridad}"
+								itemValue="#{prioridad.idPrioridad}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="p-col-12">
+						<p:inputTextarea rows="5" style="width:100%"
+							id="descripcionTicket"
+							value="#{ticketController.ticket.descripcionTicket}" />
+					</div>
+				</div>
+				<p:commandButton value="CREATE" style="width:100%"
+					action="#{ticketController.create()}" update="form table" />
+			</h:form>
+		</p:dialog>
+
+		<p:dialog header="EDIT TICKET" widgetVar="dlgEdit" minHeight="40"
+			width="500" showEffect="fade">
+			<h:form id="formEdit">
+				<div class="p-grid" id="editPanel">
+					<div class="p-col-6">
+						<p:selectOneMenu id="elementoEdit" filter="true" required="false"
+							value="#{ticketController.elemetoTicket}" style="width:100%">
+							<f:selectItem itemLabel="Select Element" itemValue="0" />
+							<f:selectItems value="#{ticketController.elementoList}"
+								var="elemento" itemLabel="#{elemento.descripcionElemento}"
+								itemValue="#{elemento.idElemento}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="p-col-6">
+						<p:selectOneMenu style="width:100%" id="prioridadEdit"
+							value="#{ticketController.prioridadTicket}">
+							<f:selectItem itemLabel="Priority" itemValue="0" />
+							<f:selectItems value="#{ticketController.prioridadList}"
+								var="prioridad" itemLabel="#{prioridad.descripcionPrioridad}"
+								itemValue="#{prioridad.idPrioridad}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="p-col-12">
+						<p:inputTextarea rows="5" style="width:100%"
+							id="descripcionTicketEdit"
+							value="#{ticketController.ticket.descripcionTicket}" />
+					</div>
+				</div>
+				<p:commandButton value="EDIT" style="width:100%"
+					action="#{ticketController.update()}" update="formEdit table" />
+			</h:form>
+		</p:dialog>
+
+
+		<p:dialog header="MARK STATUS TICKET" widgetVar="dlgEditStatus"
+			minHeight="40" width="500" showEffect="fade">
+			<h:form id="formEditStatus">
+				<div class="p-grid">
+					<div class="p-col-12">
+						<p:selectOneMenu id="elementoEditStatus" required="false"
+							value="#{ticketController.estado}" style="width:100%">
+							<f:selectItem itemLabel="Select " itemValue="0" />
+							<f:selectItems value="#{ticketController.estadoList}"
+								var="elemento" itemLabel="#{elemento.descripcionEstado}"
+								itemValue="#{elemento.idEstado}" />
+						</p:selectOneMenu>
+					</div>
+				</div>
+				<p:commandButton value="CHANGE" style="width:100%"
+					action="#{ticketController.change()}" update="formEditStatus table" />
+			</h:form>
+		</p:dialog>
+
+
+
+	</h:body>
+</f:view>
